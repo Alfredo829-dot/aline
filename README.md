@@ -5,8 +5,8 @@ Simulador de compañera IA adulta, para celular. Chat + animaciones en vídeo. S
 ## Qué es
 
 - **Personaje:** Aline, adulta ficticia. Pelo castaño en dos coletas, ojos rojos, top negro de Hello Kitty.
-- **Chat offline:** responde sin internet y sin API, con respuestas locales en `js/personaje.js`.
-- **API opcional (BYOK):** si quieres conectarle tu propia API, la key se guarda solo en tu navegador (localStorage). Nunca va al repo.
+- **Chat con modelo real (BYOK):** conecta tu propia API OpenAI-compatible en Ajustes del sitio: proveedor, endpoint, modelo y key. La key se guarda solo en tu navegador (localStorage). Nunca va al repo ni al chat. Sin key, responde offline con respuestas locales en `js/personaje.js`.
+- **Proveedores listos:** Groq (por defecto, `llama-3.3-70b-versatile`), OpenAI (`gpt-4o-mini`), OpenRouter y DeepSeek, o uno personalizado con su endpoint de `chat/completions`.
 - **Puerta +18:** pide confirmar 18+ antes de entrar. Se guarda solo en el teléfono.
 
 ## Animaciones — los 7 vídeos
@@ -33,7 +33,8 @@ También hay botones directos para cada animación y botones rápidos: Hola, Bes
 index.html          — puerta +18, escenario de vídeo, chat, ajustes
 css/app.css         — diseño móvil, vertical
 js/personaje.js     — Aline: animaciones, triggers, respuestas offline
-js/app.js           — puerta, reproductor, rotación idle, chat
+js/ai.js            — cliente de modelo real OpenAI-compatible (BYOK)
+js/app.js           — puerta, reproductor, rotación idle, chat (modelo o offline)
 clips/*.mp4         — 7 vídeos del personaje (34 MB en total)
 img/poster.jpg      — póster (frame del vídeo 01)
 img/poster-beso.jpg — póster del beso

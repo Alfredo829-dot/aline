@@ -31,6 +31,7 @@
     app.classList.remove("hidden");
     buildAnimButtons();
     playAnimation("idle-guino");
+    refreshStatus();
     addMsg("aline", "Hola, soy Aline. ¿Qué quieres hacer hoy? Pídeme un beso, una mirada, o simplemente platica conmigo.");
     scheduleIdleRotation();
   }
@@ -88,13 +89,29 @@
     }, 22000);
   }
 
-  // --- Chat offline ---
+  // --- Chat: modelo real si hay API, offline si no ---
+  const history = [];
+  const aiStatus = $("#aiStatus");
+  function setStatus(txt, online) {
+    if (!aiStatus) return;
+    aiStatus.textContent = txt;
+    aiStatus.classList.toggle("online", !!online);
+  }
+  function refreshStatus() {
+    if (typeof ALINE_AI !== "undefined" && ALINE_AI.hasKey()) {
+      const c = ALINE_AI.getConfig();
+      setStatus("IA: " + (ALINE_AI.presets[c.provider] || {}).label + " · " + c.model, true);
+    } else {
+      setStatus("Offline · respuestas guardadas", false);
+    }
+  }
   function addMsg(who, text) {
     const div = document.createElement("div");
     div.className = "msg " + who;
     div.textContent = text;
     chatLog.appendChild(div);
     chatLog.scrollTop = chatLog.scrollHeight;
+    return div;
   }
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function findAnimFor(text) {
@@ -104,21 +121,45 @@
     }
     return null;
   }
-  function reply(text) {
+  function replyOffline(text) {
     const t = text.toLowerCase();
     for (const item of ALINE.respuestas) {
       if (item.k.some(k => t.includes(k))) return pick(item.r);
     }
     return pick(ALINE.fallback);
   }
-  function send() {
+  async function send() {
     const text = input.value.trim();
     if (!text) return;
     addMsg("tu", text);
+    history.push({ role: "user", content: text });
     input.value = "";
     const anim = findAnimFor(text);
     if (anim) playAnimation(anim, true);
-    setTimeout(() => addMsg("aline", reply(text)), 500 + Math.random() * 500);
+    // Con API: modelo real. Sin API o si falla: offline, sin dejar tirado al usuario.
+    if (typeof ALINE_AI !== "undefined" && ALINE_AI.hasKey()) {
+      const typing = addMsg("aline typing", "Aline está escribiendo…");
+      try {
+        const answer = await ALINE_AI.chat(history);
+        typing.remove();
+        addMsg("aline", answer);
+        history.push({ role: "assistant", content: answer });
+        refreshStatus();
+        return;
+      } catch (e) {
+        typing.remove();
+        setStatus("Offline · falló la API, revisa tu key", false);
+        const fallback = replyOffline(text);
+        addMsg("aline", fallback);
+        history.push({ role: "assistant", content: fallback });
+        return;
+      }
+    }
+    setTimeout(() => {
+      const fallback = replyOffline(text);
+      addMsg("aline", fallback);
+      history.push({ role: "assistant", content: fallback });
+    }, 500 + Math.random() * 500);
   }
   sendBtn.addEventListener("click", send);
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
@@ -131,23 +172,57 @@
     });
   });
 
-  // --- Ajustes: nombre y API opcional (BYOK, solo en este navegador) ---
+  // --- Ajustes: nombre y modelo real BYOK (solo en este navegador) ---
   const nameInput = $("#userName");
   const apiInput = $("#apiKey");
+  const providerSelect = $("#provider");
+  const endpointInput = $("#endpoint");
+  const modelInput = $("#model");
   const saveSettings = $("#saveSettings");
+  const testBtn = $("#testApi");
+  const apiMsg = $("#apiMsg");
+  function fillPreset() {
+    const p = (typeof ALINE_AI !== "undefined" && ALINE_AI.presets[providerSelect.value]) || {};
+    if (providerSelect.value !== "custom") {
+      endpointInput.value = p.endpoint || "";
+      modelInput.value = p.model || "";
+    }
+  }
+  if (typeof ALINE_AI !== "undefined") {
+    const cfg = ALINE_AI.getConfig();
+    providerSelect.value = cfg.provider;
+    endpointInput.value = cfg.endpoint;
+    modelInput.value = cfg.model;
+  }
+  providerSelect.addEventListener("change", fillPreset);
   nameInput.value = localStorage.getItem("aline-nombre") || "";
   apiInput.value = localStorage.getItem("aline-api") ? "••••••••" : "";
-  saveSettings.addEventListener("click", () => {
+  function saveAll() {
     localStorage.setItem("aline-nombre", nameInput.value.trim());
+    localStorage.setItem("aline-provider", providerSelect.value);
+    localStorage.setItem("aline-endpoint", endpointInput.value.trim());
+    localStorage.setItem("aline-model", modelInput.value.trim());
     const v = apiInput.value.trim();
     if (v && v !== "••••••••") localStorage.setItem("aline-api", v);
+    refreshStatus();
+  }
+  saveSettings.addEventListener("click", () => {
+    saveAll();
     saveSettings.textContent = "Guardado ✓";
     setTimeout(() => saveSettings.textContent = "Guardar", 1500);
   });
+  testBtn.addEventListener("click", async () => {
+    saveAll();
+    apiMsg.textContent = "Probando…";
+    try {
+      const answer = await ALINE_AI.chat([{ role: "user", content: "Hola, di solo: prueba ok" }]);
+      apiMsg.textContent = "✓ Conectado. El modelo respondió: " + answer;
+    } catch (e) {
+      apiMsg.textContent = "✗ No conectó: " + e.message + ". Revisa proveedor, modelo y key.";
+    }
+  });
   $("#clearData").addEventListener("click", () => {
-    localStorage.removeItem("aline-18");
-    localStorage.removeItem("aline-nombre");
-    localStorage.removeItem("aline-api");
+    ["aline-18", "aline-nombre", "aline-api", "aline-provider", "aline-endpoint", "aline-model"].forEach(k => localStorage.removeItem(k));
     location.reload();
   });
 })();

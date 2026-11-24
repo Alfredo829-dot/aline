@@ -33,6 +33,7 @@
       <span id="animName">Aline — Guiño</span>
     </div>
     <span class="badge">+18</span>
+    <span id="aiStatus" class="ai-status">Offline</span>
   </header>
 
   <section class="stage">
@@ -58,14 +59,28 @@
       <input id="chatInput" type="text" placeholder="Escríbele a Aline…" autocomplete="off" maxlength="300">
       <button id="sendBtn">➤</button>
     </div>
-    <p class="tiny">Chat offline: Aline responde sin internet y sin API. Las palabras como “beso”, “playa”, “parque” o “tímida” cambian su animación.</p>
+    <p class="tiny">Con API configurada responde el modelo real. Sin API, usa respuestas guardadas offline. Las palabras como “beso”, “playa”, “parque” o “tímida” cambian su animación.</p>
   </section>
 
   <details class="settings">
     <summary>Ajustes y privacidad</summary>
     <label>Tu nombre (opcional)<input id="userName" type="text" placeholder="Cómo quieres que te llame"></label>
-    <label>API key propia (opcional, BYOK — solo se guarda en tu navegador, nunca en el repo)<input id="apiKey" type="password" placeholder="sk-… (opcional)"></label>
+    <label>Proveedor del modelo
+      <select id="provider">
+        <option value="groq">Groq (rápido, gratis con key)</option>
+        <option value="openai">OpenAI</option>
+        <option value="openrouter">OpenRouter</option>
+        <option value="deepseek">DeepSeek</option>
+        <option value="custom">Personalizado</option>
+      </select>
+    </label>
+    <label>Endpoint (URL de chat completions)<input id="endpoint" type="text" placeholder="https://api.groq.com/openai/v1/chat/completions"></label>
+    <label>Modelo<input id="model" type="text" placeholder="llama-3.3-70b-versatile"></label>
+    <label>Tu API key (BYOK — solo se guarda en tu navegador, nunca en el repo)<input id="apiKey" type="password" placeholder="gsk-… / sk-…"></label>
     <button id="saveSettings">Guardar</button>
+    <button id="testApi" type="button">Probar conexión</button>
+    <p id="apiMsg" class="tiny"></p>
+    <p class="tiny">Pega tu key aquí mismo en el sitio, no en el chat ni en GitHub. Sin key, Aline sigue respondiendo offline.</p>
     <button id="clearData" class="danger">Borrar mis datos de este teléfono</button>
     <p class="tiny">Sin cuentas, sin servidor, sin claves en el código. Los 7 vídeos están en la carpeta <code>clips/</code>.</p>
   </details>
@@ -74,6 +89,7 @@
 </main>
 
 <script src="js/personaje.js"></script>
+<script src="js/ai.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
