@@ -1,0 +1,47 @@
+* { box-sizing: border-box; }
+:root { --bg: #0b0b10; --card: #15151d; --pink: #ff5c8a; --pink2: #ff8fb1; --text: #f5f0f2; --muted: #a9a3a8; --line: #262633; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+.hidden { display: none !important; }
+.tiny { color: var(--muted); font-size: 12px; line-height: 1.5; }
+button { font: inherit; cursor: pointer; }
+
+/* Puerta +18 */
+.gate { min-height: 100dvh; display: grid; place-items: center; padding: 20px; }
+.gate-card { max-width: 380px; width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px; text-align: center; }
+.gate-img { width: 100%; aspect-ratio: 688/1152; object-fit: cover; object-position: top; border-radius: 14px; max-height: 52dvh; }
+.gate-card h1 { margin: 14px 0 2px; font-size: 34px; }
+.sub { color: var(--pink2); margin: 0 0 10px; font-weight: 600; }
+.check { display: flex; gap: 8px; align-items: center; justify-content: center; margin: 16px 0; font-size: 14px; }
+#enterBtn { width: 100%; padding: 13px; border: 0; border-radius: 12px; background: var(--pink); color: #fff; font-weight: 700; }
+#enterBtn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* App */
+#app { max-width: 520px; margin: 0 auto; padding: 12px 12px 32px; }
+.top { display: flex; align-items: center; gap: 10px; padding: 6px 2px 12px; }
+.top strong { display: block; font-size: 19px; }
+.top span { color: var(--muted); font-size: 13px; }
+.avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; object-position: top; border: 2px solid var(--pink); }
+.badge { margin-left: auto; background: #2a121c; color: var(--pink2); border: 1px solid #5a2438; padding: 4px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.stage video { width: 100%; aspect-ratio: 688/1152; object-fit: cover; border-radius: 18px; background: #000; display: block; }
+.anim-desc { color: var(--muted); font-size: 13px; margin: 8px 2px 0; min-height: 18px; }
+.anims h2 { font-size: 14px; margin: 18px 2px 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 9px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--text); }
+.chip.active { background: var(--pink); border-color: var(--pink); color: #fff; font-weight: 700; }
+.quick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.quick button { padding: 9px 11px; border-radius: 10px; border: 1px solid var(--line); background: #1e1e28; color: var(--text); }
+.chat-log { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px; min-height: 180px; max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+.msg { max-width: 85%; padding: 10px 12px; border-radius: 14px; line-height: 1.45; font-size: 15px; }
+.msg.aline { background: #241a20; border: 1px solid #3a2430; align-self: flex-start; border-bottom-left-radius: 4px; }
+.msg.tu { background: var(--pink); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+.chat-input { display: flex; gap: 8px; margin-top: 10px; }
+.chat-input input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--text); outline: none; }
+.chat-input input:focus { border-color: var(--pink); }
+#sendBtn { width: 48px; border-radius: 12px; border: 0; background: var(--pink); color: #fff; font-size: 18px; }
+.settings { margin-top: 18px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+.settings summary { cursor: pointer; font-weight: 700; }
+.settings label { display: block; margin-top: 12px; font-size: 13px; color: var(--muted); }
+.settings input { width: 100%; margin-top: 6px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: #0f0f16; color: var(--text); }
+.settings button { margin-top: 12px; padding: 10px 14px; border-radius: 10px; border: 0; background: var(--pink); color: #fff; font-weight: 700; }
+.settings button.danger { background: transparent; border: 1px solid #5a2438; color: var(--pink2); margin-left: 8px; }
+footer { text-align: center; margin-top: 18px; }

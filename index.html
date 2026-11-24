@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aline — Compañera IA +18</title>
+<meta name="description" content="Aline, compañera IA adulta. Chat y animaciones en vídeo. Solo para adultos. Sin servidor, sin claves en el código.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b0b10">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- Puerta +18 -->
+<div id="gate" class="gate">
+  <div class="gate-card">
+    <img src="img/poster.jpg" alt="Aline" class="gate-img">
+    <h1>Aline</h1>
+    <p class="sub">Compañera IA · Solo para adultos</p>
+    <p>Contenido para mayores de 18 años. Personaje ficticio, generado por IA. Nada de lo que dice es consejo real, y todo queda en tu teléfono.</p>
+    <label class="check"><input type="checkbox" id="ageCheck"> Confirmo que tengo 18 años o más</label>
+    <button id="enterBtn" disabled>Entrar con Aline</button>
+    <p class="tiny">Al entrar aceptas que eres adulto. No se sube nada a ningún servidor.</p>
+  </div>
+</div>
+
+<!-- App -->
+<main id="app" class="hidden">
+  <header class="top">
+    <img src="img/poster.jpg" class="avatar" alt="Aline">
+    <div>
+      <strong>Aline</strong>
+      <span id="animName">Aline — Guiño</span>
+    </div>
+    <span class="badge">+18</span>
+  </header>
+
+  <section class="stage">
+    <video id="stageVideo" playsinline muted loop autoplay preload="auto" poster="img/poster.jpg"></video>
+    <p id="animDesc" class="anim-desc"></p>
+  </section>
+
+  <section class="anims">
+    <h2>Animaciones</h2>
+    <div id="animButtons" class="chips"></div>
+    <div class="quick">
+      <button data-say="Hola Aline">👋 Hola</button>
+      <button data-say="Dame un beso">😘 Beso</button>
+      <button data-say="Mírame">👀 Mírame</button>
+      <button data-say="Te quiero">❤️ Te quiero</button>
+      <button data-say="Estoy triste">🫂 Anímame</button>
+    </div>
+  </section>
+
+  <section class="chat">
+    <div id="chatLog" class="chat-log"></div>
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Escríbele a Aline…" autocomplete="off" maxlength="300">
+      <button id="sendBtn">➤</button>
+    </div>
+    <p class="tiny">Chat offline: Aline responde sin internet y sin API. Las palabras como “beso”, “playa”, “parque” o “tímida” cambian su animación.</p>
+  </section>
+
+  <details class="settings">
+    <summary>Ajustes y privacidad</summary>
+    <label>Tu nombre (opcional)<input id="userName" type="text" placeholder="Cómo quieres que te llame"></label>
+    <label>API key propia (opcional, BYOK — solo se guarda en tu navegador, nunca en el repo)<input id="apiKey" type="password" placeholder="sk-… (opcional)"></label>
+    <button id="saveSettings">Guardar</button>
+    <button id="clearData" class="danger">Borrar mis datos de este teléfono</button>
+    <p class="tiny">Sin cuentas, sin servidor, sin claves en el código. Los 7 vídeos están en la carpeta <code>clips/</code>.</p>
+  </details>
+
+  <footer class="tiny">Aline es un personaje ficticio adulto generado por IA. +18. Hecho para uso personal.</footer>
+</main>
+
+<script src="js/personaje.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
