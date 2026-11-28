@@ -61,9 +61,10 @@
     </div>
     <p class="tiny">Con API configurada responde el modelo real. Sin API, usa respuestas guardadas offline. Las palabras como “beso”, “playa”, “parque” o “tímida” cambian su animación. Comandos: /ayuda /modo /recuerda /estado /lista /anima /pose /idle</p>
     <div class="image-gen">
-      <input id="imagePrompt" type="text" placeholder="Describe una imagen de Aline… (solo con servidor)" autocomplete="off" maxlength="200">
+      <input id="imagePrompt" type="text" placeholder="Describe la escena de Aline… (siempre es ella, sin modificarla)" autocomplete="off" maxlength="200">
       <button id="imageBtn" type="button">🎨 Generar imagen</button>
     </div>
+    <p class="tiny">Cada imagen es siempre Aline, con su cara, su pelo, sus ojos y su ropa de siempre. Lo que escribas solo cambia la escena, el lugar o la pose.</p>
     <p id="imageMsg" class="tiny"></p>
     <img id="generatedImage" class="generated-img hidden" alt="Imagen generada de Aline">
   </section>
@@ -84,6 +85,7 @@
     <label>Endpoint (URL de chat completions)<input id="endpoint" type="text" placeholder="https://api.groq.com/openai/v1/chat/completions"></label>
     <label>Modelo<input id="model" type="text" placeholder="llama-3.3-70b-versatile"></label>
     <label>Tu API key (BYOK — solo se guarda en tu navegador, nunca en el repo)<input id="apiKey" type="password" placeholder="gsk-… / sk-…"></label>
+    <label>Key para imágenes (Together, para generar sin servidor — solo en tu navegador)<input id="imageKey" type="password" placeholder="key de Together…"></label>
     <label>Mi servidor (opcional — Llama/Mistral + Stable Diffusion + historial cifrado en Postgres)
       <input id="serverUrl" type="text" placeholder="http://localhost:3001 o https://tu-servidor.com">
     </label>

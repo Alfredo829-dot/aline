@@ -17,6 +17,14 @@ const ALINE_AI = {
     custom: { label: "Personalizado", endpoint: "", model: "" }
   },
 
+  // Bloqueo de personaje para imágenes: Aline siempre igual, sin modificarla.
+  // Lo que el usuario escribe solo cambia escena, lugar o pose, nunca a ella.
+  character: "Aline, adult fictional anime woman, same character in every image: long straight brown hair in two ponytails, red eyes, black Hello Kitty top, black choker with cross necklace, black shorts, same face and body as her reference photos",
+  buildImagePrompt(userText) {
+    const scene = (userText || "").trim().slice(0, 200);
+    return this.character + ". Scene: " + (scene || "standing, smiling at the camera") + ". Depict ONLY Aline in this scene, with her exact face, hair, eyes and outfit above. Do not change her appearance, do not change her hair, face or outfit, do not add any other person, do not draw anything without Aline. Adult fictional character only, no minors, no real people.";
+  },
+
   getConfig() {
     const provider = localStorage.getItem("aline-provider") || "groq";
     const preset = this.presets[provider] || this.presets.groq;
@@ -25,6 +33,8 @@ const ALINE_AI = {
       endpoint: localStorage.getItem("aline-endpoint") || preset.endpoint,
       model: localStorage.getItem("aline-model") || preset.model,
       key: localStorage.getItem("aline-api") || "",
+      // Key solo para imágenes (Together). Si el proveedor es Together, se reusa la key del chat.
+      imageKey: localStorage.getItem("aline-image-key") || (provider === "together" ? (localStorage.getItem("aline-api") || "") : ""),
       nombre: localStorage.getItem("aline-nombre") || "",
       serverUrl: (localStorage.getItem("aline-server-url") || "").replace(/\/$/, ""),
       useServer: localStorage.getItem("aline-use-server") === "si",
@@ -87,6 +97,57 @@ const ALINE_AI = {
     if (data.imageUrl) return { url: data.imageUrl };
     if (data.imageBase64) return { url: "data:image/png;base64," + data.imageBase64 };
     throw new Error(data.note || "El servidor no devolvió imagen");
+  },
+
+  // Generar sin servidor: Together FLUX gratis, directo desde el navegador.
+  // El prompt siempre lleva el bloqueo de personaje de buildImagePrompt().
+  async imageDirect(userText) {
+    const c = this.getConfig();
+    if (!c.imageKey) throw new Error("Pon tu key de Together en Ajustes (Key para imágenes) para generar sin servidor");
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60000);
+    try {
+      const res = await fetch("https://api.together.xyz/v1/images/generations", {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + c.imageKey
+        },
+        body: JSON.stringify({
+          model: "black-forest-labs/FLUX.1-schnell-Free",
+          prompt: this.buildImagePrompt(userText),
+          width: 768,
+          height: 1024,
+          steps: 4
+        })
+      });
+      if (!res.ok) {
+        let detail = "";
+        try { detail = (await res.json()).error?.message || (await res.json()).error || ""; } catch (e) {}
+        throw new Error("Imagen " + res.status + (detail ? ": " + detail : ""));
+      }
+      const data = await res.json();
+      const item = (data.data && data.data[0]) || {};
+      if (item.url) return { url: item.url };
+      if (item.b64_json) return { url: "data:image/png;base64," + item.b64_json };
+      throw new Error("Together no devolvió imagen");
+    } catch (e) {
+      if (e.name === "TypeError" || e.name === "AbortError") {
+        throw new Error("Together no permitió la llamada desde el navegador. Usa tu servidor para generar imágenes.");
+      }
+      throw e;
+    } finally {
+      clearTimeout(timer);
+    }
+  },
+
+  // Punto único para el botón 🎨: con servidor usa el servidor, si no Together directo.
+  // En ambos casos el prompt va con el bloqueo de personaje.
+  async generateImage(userText) {
+    const c = this.getConfig();
+    if (c.useServer && c.serverUrl) return this.imageViaServer(this.buildImagePrompt(userText));
+    return this.imageDirect(userText);
   },
 
   async chat(history, customSystem) {
