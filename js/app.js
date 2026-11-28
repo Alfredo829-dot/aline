@@ -28,10 +28,14 @@
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
     return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
   }
+  function startGate() {
+    const saved = localStorage.getItem("aline-18");
+    if (saved === "si") { showApp(); } else { gate.classList.remove("hidden"); }
+  }
   function unlock() {
     localStorage.setItem("aline-unlocked", "si");
     lockEl.classList.add("hidden");
-    if (localStorage.getItem("aline-18") === "si") { showApp(); } else { gate.classList.remove("hidden"); }
+    startGate();
   }
   async function tryUnlock() {
     if (!crypto.subtle) { lockMsg.textContent = "Este navegador no soporta el bloqueo, abre el sitio por https."; return; }
@@ -39,15 +43,19 @@
     if (hash === ALINE_PASS_HASH) { lockMsg.textContent = ""; unlock(); }
     else { lockMsg.textContent = "Contraseña incorrecta."; lockInput.value = ""; lockInput.focus(); }
   }
-  lockBtn.addEventListener("click", tryUnlock);
-  lockInput.addEventListener("keydown", (e) => { if (e.key === "Enter") tryUnlock(); });
-  if (localStorage.getItem("aline-unlocked") !== "si") {
-    lockEl.classList.remove("hidden");
-    gate.classList.add("hidden");
+  // Si el HTML en caché es viejo y no trae la pantalla de bloqueo, no romper
+  // toda la app: se sigue con la puerta +18 normal hasta que cargue el HTML nuevo.
+  if (lockEl && lockBtn && lockInput && lockMsg) {
+    lockBtn.addEventListener("click", tryUnlock);
+    lockInput.addEventListener("keydown", (e) => { if (e.key === "Enter") tryUnlock(); });
+    if (localStorage.getItem("aline-unlocked") !== "si") {
+      lockEl.classList.remove("hidden");
+      gate.classList.add("hidden");
+    } else {
+      startGate();
+    }
   } else {
-    // --- Puerta +18 (ya desbloqueado) ---
-    const saved = localStorage.getItem("aline-18");
-    if (saved === "si") { showApp(); } else { gate.classList.remove("hidden"); }
+    startGate();
   }
   ageCheck.addEventListener("change", () => { enterBtn.disabled = !ageCheck.checked; });
   enterBtn.addEventListener("click", () => {
