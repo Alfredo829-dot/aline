@@ -39,7 +39,7 @@ app.get('/api/providers', (req, res) => res.json(providers.availableProviders())
 // --- Chat ---
 app.post('/api/chat', async (req, res) => {
   try {
-    const { messages, conversationId, provider, model } = req.body || {};
+    const { messages, conversationId, provider, model, system } = req.body || {};
     if (!Array.isArray(messages) || !messages.length) {
       return res.status(400).json({ error: 'messages[] requerido' });
     }
@@ -49,7 +49,7 @@ app.post('/api/chat', async (req, res) => {
     }
     const clean = messages.slice(-16).map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content || '').slice(0, 1000) }));
 
-    const result = await providers.chat(clean, provider, model);
+    const result = await providers.chat(clean, provider, model, system ? String(system).slice(0, 4000) : undefined);
 
     // Guardar encriptado si hay DB + clave. Si no hay, el chat igual responde.
     let convId = conversationId || null;

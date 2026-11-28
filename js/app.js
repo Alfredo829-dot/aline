@@ -133,18 +133,59 @@
     return pick(ALINE.fallback);
   }
   async function send() {
-    const text = input.value.trim();
-    if (!text) return;
-    addMsg("tu", text);
-    history.push({ role: "user", content: text });
+    const mensajeUsuario = input.value.trim();
+    if (!mensajeUsuario) return;
+    addMsg("tu", mensajeUsuario);
     input.value = "";
-    const anim = findAnimFor(text);
-    if (anim) playAnimation(anim, true);
+
+    // 1. Animaciones: ALINE_ANIMA.procesar (tu snippet)
+    let animaTriggered = false;
+    if (typeof ALINE_ANIMA !== "undefined") {
+      const res = ALINE_ANIMA.procesar(mensajeUsuario);
+      if (res.local) {
+        addMsg("aline", res.local);
+      }
+      if (res.anima) {
+        playAnimation(res.anima, true);
+        animaTriggered = true;
+      }
+      // Comandos de animación resueltos en local (/lista, /anima, /pose, /idle):
+      // no van al modelo.
+      if (res.local && mensajeUsuario.startsWith("/")) {
+        history.push({ role: "assistant", content: res.local });
+        return;
+      }
+    }
+    if (!animaTriggered) {
+      const anim = findAnimFor(mensajeUsuario);
+      if (anim) playAnimation(anim, true);
+    }
+
+    // 2. Skills: ALINE_SKILLS.procesar (tu snippet)
+    let textoParaModelo = mensajeUsuario;
+    let system = null;
+    if (typeof ALINE_SKILLS !== "undefined") {
+      const procesado = ALINE_SKILLS.procesar(mensajeUsuario);
+      if (procesado.respuestaLocal) {
+        // muestra esto directo en el chat (no va al modelo)
+        addMsg("aline", procesado.respuestaLocal);
+        history.push({ role: "assistant", content: procesado.respuestaLocal });
+        return;
+      }
+      if (procesado.mensaje) textoParaModelo = procesado.mensaje;
+      else if (procesado.mensaje === null) return;
+      // Si sigue, manda al modelo usando el system con skills:
+      if (typeof getSystemConSkills === "function") {
+        system = getSystemConSkills();
+      }
+    }
+
+    history.push({ role: "user", content: textoParaModelo });
     // Con API: modelo real. Sin API o si falla: offline, sin dejar tirado al usuario.
     if (typeof ALINE_AI !== "undefined" && ALINE_AI.hasKey()) {
       const typing = addMsg("aline typing", "Aline está escribiendo…");
       try {
-        const answer = await ALINE_AI.chat(history);
+        const answer = await ALINE_AI.chat(history, system);
         typing.remove();
         addMsg("aline", answer);
         history.push({ role: "assistant", content: answer });
@@ -153,14 +194,14 @@
       } catch (e) {
         typing.remove();
         setStatus("Offline · falló la API, revisa tu key", false);
-        const fallback = replyOffline(text);
+        const fallback = replyOffline(textoParaModelo);
         addMsg("aline", fallback);
         history.push({ role: "assistant", content: fallback });
         return;
       }
     }
     setTimeout(() => {
-      const fallback = replyOffline(text);
+      const fallback = replyOffline(textoParaModelo);
       addMsg("aline", fallback);
       history.push({ role: "assistant", content: fallback });
     }, 500 + Math.random() * 500);
@@ -256,7 +297,7 @@
     }
   });
   $("#clearData").addEventListener("click", () => {
-    ["aline-18", "aline-nombre", "aline-api", "aline-provider", "aline-endpoint", "aline-model", "aline-server-url", "aline-use-server", "aline-conversation-id"].forEach(k => localStorage.removeItem(k));
+    ["aline-18", "aline-nombre", "aline-api", "aline-provider", "aline-endpoint", "aline-model", "aline-server-url", "aline-use-server", "aline-conversation-id", "aline-memoria", "aline-modo"].forEach(k => localStorage.removeItem(k));
     location.reload();
   });
 })();

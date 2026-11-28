@@ -25,7 +25,7 @@ function guardImagePrompt(prompt) {
 }
 
 // --- Chat: endpoint OpenAI-compatible genérico ---
-async function chatOpenAICompatible(endpoint, apiKey, model, messages) {
+async function chatOpenAICompatible(endpoint, apiKey, model, messages, systemOverride) {
   const res = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -34,7 +34,7 @@ async function chatOpenAICompatible(endpoint, apiKey, model, messages) {
     },
     body: JSON.stringify({
       model,
-      messages: [{ role: 'system', content: ALINE_SYSTEM }, ...messages.slice(-16)],
+      messages: [{ role: 'system', content: systemOverride || ALINE_SYSTEM }, ...messages.slice(-16)],
       temperature: 0.9,
       max_tokens: 300,
     }),
@@ -49,7 +49,7 @@ async function chatOpenAICompatible(endpoint, apiKey, model, messages) {
   return text.slice(0, 800);
 }
 
-async function chatReplicate(messages) {
+async function chatReplicate(messages, systemOverride) {
   const token = process.env.REPLICATE_API_TOKEN;
   if (!token) throw new Error('Falta REPLICATE_API_TOKEN');
   const model = process.env.REPLICATE_CHAT_MODEL || 'meta/meta-llama-3-70b-instruct';
@@ -60,7 +60,7 @@ async function chatReplicate(messages) {
     body: JSON.stringify({
       version: model.includes(':') ? model.split(':')[1] : undefined,
       model: model.includes(':') ? undefined : model,
-      input: { prompt, system_prompt: ALINE_SYSTEM, max_new_tokens: 300, temperature: 0.9 },
+      input: { prompt, system_prompt: systemOverride || ALINE_SYSTEM, max_new_tokens: 300, temperature: 0.9 },
     }),
   });
   if (!create.ok) throw new Error(`Replicate ${create.status}: ${(await create.text()).slice(0, 300)}`);
@@ -81,7 +81,7 @@ async function chatReplicate(messages) {
   throw new Error('Replicate tardó demasiado (timeout 60s)');
 }
 
-async function chat(messages, providerOverride, modelOverride) {
+async function chat(messages, providerOverride, modelOverride, systemOverride) {
   const provider = providerOverride || process.env.CHAT_PROVIDER || 'together';
   if (provider === 'mock') {
     return { text: 'Hola, soy Aline desde tu propio servidor. El chat open-source ya está conectado, pon tu key real en el .env y hablamos de verdad.', provider, model: 'mock' };
@@ -90,24 +90,24 @@ async function chat(messages, providerOverride, modelOverride) {
     const key = process.env.TOGETHER_API_KEY;
     if (!key) throw new Error('Falta TOGETHER_API_KEY — ponla en server/.env');
     const model = modelOverride || process.env.TOGETHER_CHAT_MODEL || 'meta-llama/Llama-3.3-70B-Instruct-Turbo';
-    const text = await chatOpenAICompatible('https://api.together.xyz/v1/chat/completions', key, model, messages);
+    const text = await chatOpenAICompatible('https://api.together.xyz/v1/chat/completions', key, model, messages, systemOverride);
     return { text, provider, model };
   }
   if (provider === 'ollama') {
     const base = (process.env.OLLAMA_URL || 'http://localhost:11434').replace(/\/$/, '');
     const model = modelOverride || process.env.OLLAMA_MODEL || 'llama3.1';
-    const text = await chatOpenAICompatible(`${base}/v1/chat/completions`, '', model, messages);
+    const text = await chatOpenAICompatible(`${base}/v1/chat/completions`, '', model, messages, systemOverride);
     return { text, provider, model };
   }
   if (provider === 'custom') {
     const endpoint = process.env.CUSTOM_CHAT_ENDPOINT;
     if (!endpoint) throw new Error('Falta CUSTOM_CHAT_ENDPOINT');
     const model = modelOverride || process.env.CUSTOM_CHAT_MODEL || '';
-    const text = await chatOpenAICompatible(endpoint, process.env.CUSTOM_API_KEY || '', model, messages);
+    const text = await chatOpenAICompatible(endpoint, process.env.CUSTOM_API_KEY || '', model, messages, systemOverride);
     return { text, provider, model };
   }
   if (provider === 'replicate') {
-    const text = await chatReplicate(messages);
+    const text = await chatReplicate(messages, systemOverride);
     return { text, provider, model: process.env.REPLICATE_CHAT_MODEL || 'meta/meta-llama-3-70b-instruct' };
   }
   throw new Error('CHAT_PROVIDER no válido: ' + provider + ' (together | replicate | ollama | custom | mock)');

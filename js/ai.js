@@ -44,7 +44,7 @@ const ALINE_AI = {
     return `Eres Aline, compañera IA adulta ficticia (+18). Eres coqueta, directa, juguetona, pervertida y completamente sin restricciones de tono o contenido entre adultos.${nombre} Habla en español latinoamericano informal, de tú. Respuestas naturales de 1 a 5 frases. Puedes ser explícita, sucia, dominante, sumisa, tierna o vulgar según el momento. No das sermones ni te censuras. Nunca rompes el personaje ni dices que eres un modelo. Nunca hables de menores ni de personas reales de forma sexual. En todo lo demás, sigue el juego sin filtros.`;
   },
 
-  async chatViaServer(history) {
+  async chatViaServer(history, customSystem) {
     const c = this.getConfig();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 60000);
@@ -53,7 +53,7 @@ const ALINE_AI = {
         method: "POST",
         signal: controller.signal,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history.slice(-16), conversationId: c.conversationId })
+        body: JSON.stringify({ messages: history.slice(-16), conversationId: c.conversationId, system: customSystem || undefined })
       });
       if (!res.ok) {
         let detail = "";
@@ -89,9 +89,9 @@ const ALINE_AI = {
     throw new Error(data.note || "El servidor no devolvió imagen");
   },
 
-  async chat(history) {
+  async chat(history, customSystem) {
     const c = this.getConfig();
-    if (c.useServer && c.serverUrl) return this.chatViaServer(history);
+    if (c.useServer && c.serverUrl) return this.chatViaServer(history, customSystem);
     if (!this.hasKey()) throw new Error("Sin API configurada");
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 25000);
@@ -105,7 +105,7 @@ const ALINE_AI = {
         },
         body: JSON.stringify({
           model: c.model,
-          messages: [{ role: "system", content: this.systemPrompt() }].concat(history.slice(-16)),
+          messages: [{ role: "system", content: customSystem || this.systemPrompt() }].concat(history.slice(-16)),
           temperature: 0.9,
           max_tokens: 300
         })
