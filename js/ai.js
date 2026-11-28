@@ -10,7 +10,7 @@
 const ALINE_AI = {
   presets: {
     openai: { label: "OpenAI", endpoint: "https://api.openai.com/v1/chat/completions", model: "gpt-4o-mini" },
-    groq: { label: "Groq", endpoint: "https://api.groq.com/openai/v1/chat/completions", model: "llama-3.3-70b-versatile" },
+    groq: { label: "Groq", endpoint: "https://api.groq.com/openai/v1/chat/completions", model: "openai/gpt-oss-120b" },
     openrouter: { label: "OpenRouter", endpoint: "https://openrouter.ai/api/v1/chat/completions", model: "openai/gpt-4o-mini" },
     deepseek: { label: "DeepSeek", endpoint: "https://api.deepseek.com/v1/chat/completions", model: "deepseek-chat" },
     together: { label: "Together AI (Llama/Mistral)", endpoint: "https://api.together.xyz/v1/chat/completions", model: "meta-llama/Llama-3.3-70B-Instruct-Turbo" },
@@ -28,10 +28,15 @@ const ALINE_AI = {
   getConfig() {
     const provider = localStorage.getItem("aline-provider") || "groq";
     const preset = this.presets[provider] || this.presets.groq;
+    // Migración: llama-3.3-70b-versatile ya no existe en cuentas nuevas de Groq
+    // (la API devuelve 404 model_not_found). Los teléfonos que lo tenían guardado
+    // pasan solos a gpt-oss-120b, que sí está activo en esa cuenta.
+    let model = localStorage.getItem("aline-model") || preset.model;
+    if (provider === "groq" && model === "llama-3.3-70b-versatile") model = "openai/gpt-oss-120b";
     return {
       provider,
       endpoint: localStorage.getItem("aline-endpoint") || preset.endpoint,
-      model: localStorage.getItem("aline-model") || preset.model,
+      model,
       key: localStorage.getItem("aline-api") || "",
       // Key solo para imágenes (Together). Si el proveedor es Together, se reusa la key del chat.
       imageKey: localStorage.getItem("aline-image-key") || (provider === "together" ? (localStorage.getItem("aline-api") || "") : ""),
@@ -168,7 +173,8 @@ const ALINE_AI = {
           model: c.model,
           messages: [{ role: "system", content: customSystem || this.systemPrompt() }].concat(history.slice(-16)),
           temperature: 0.9,
-          max_tokens: 300
+          // 600 porque gpt-oss gasta tokens en razonamiento antes de responder.
+          max_tokens: 600
         })
       });
       if (!res.ok) {
