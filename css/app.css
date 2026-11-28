@@ -22,6 +22,8 @@ button { font: inherit; cursor: pointer; }
 .top span { color: var(--muted); font-size: 13px; }
 .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; object-position: top; border: 2px solid var(--pink); }
 .badge { margin-left: auto; background: #2a121c; color: var(--pink2); border: 1px solid #5a2438; padding: 4px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.gate input[type="password"] { width: 100%; margin: 10px 0; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: #0f0f16; color: var(--text); }
+#lockMsg { color: #ff7a7a; min-height: 16px; }
 .ai-status { font-size: 11px; color: var(--muted); border: 1px solid var(--line); padding: 4px 8px; border-radius: 999px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ai-status.online { color: #7ee2a8; border-color: #1e4d31; }
 .msg.typing { opacity: .7; font-style: italic; }

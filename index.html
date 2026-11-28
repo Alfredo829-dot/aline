@@ -11,8 +11,22 @@
 </head>
 <body>
 
+<!-- Bloqueo con contraseña -->
+<div id="lock" class="gate hidden">
+  <div class="gate-card">
+    <img src="img/poster.jpg" alt="Aline" class="gate-img">
+    <h1>Aline</h1>
+    <p class="sub">Sitio privado</p>
+    <p>Escribe la contraseña para entrar.</p>
+    <input id="lockInput" type="password" placeholder="Contraseña" autocomplete="off">
+    <button id="lockBtn">Entrar</button>
+    <p id="lockMsg" class="tiny"></p>
+    <p class="tiny">Se recuerda en este teléfono. No es seguridad real: el código del sitio es público y la contraseña se puede saltar leyendo el código.</p>
+  </div>
+</div>
+
 <!-- Puerta +18 -->
-<div id="gate" class="gate">
+<div id="gate" class="gate hidden">
   <div class="gate-card">
     <img src="img/poster.jpg" alt="Aline" class="gate-img">
     <h1>Aline</h1>

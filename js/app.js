@@ -17,9 +17,38 @@
   let idleTimer = null;
   let lastIdle = -1;
 
-  // --- Puerta +18 ---
-  const saved = localStorage.getItem("aline-18");
-  if (saved === "si") { showApp(); } else { gate.classList.remove("hidden"); }
+  // --- Bloqueo con contraseña (solo el hash SHA-256 en el código, nunca la contraseña en texto) ---
+  // Hash de la contraseña elegida por el usuario el 2026-11-28.
+  const ALINE_PASS_HASH = "2875f3ad075f7a1e3cb9f4ed19e7b7f4021fb46f6507b1feaae052f1f67858ac";
+  const lockEl = $("#lock");
+  const lockInput = $("#lockInput");
+  const lockBtn = $("#lockBtn");
+  const lockMsg = $("#lockMsg");
+  async function sha256Hex(text) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  function unlock() {
+    localStorage.setItem("aline-unlocked", "si");
+    lockEl.classList.add("hidden");
+    if (localStorage.getItem("aline-18") === "si") { showApp(); } else { gate.classList.remove("hidden"); }
+  }
+  async function tryUnlock() {
+    if (!crypto.subtle) { lockMsg.textContent = "Este navegador no soporta el bloqueo, abre el sitio por https."; return; }
+    const hash = await sha256Hex(lockInput.value);
+    if (hash === ALINE_PASS_HASH) { lockMsg.textContent = ""; unlock(); }
+    else { lockMsg.textContent = "Contraseña incorrecta."; lockInput.value = ""; lockInput.focus(); }
+  }
+  lockBtn.addEventListener("click", tryUnlock);
+  lockInput.addEventListener("keydown", (e) => { if (e.key === "Enter") tryUnlock(); });
+  if (localStorage.getItem("aline-unlocked") !== "si") {
+    lockEl.classList.remove("hidden");
+    gate.classList.add("hidden");
+  } else {
+    // --- Puerta +18 (ya desbloqueado) ---
+    const saved = localStorage.getItem("aline-18");
+    if (saved === "si") { showApp(); } else { gate.classList.remove("hidden"); }
+  }
   ageCheck.addEventListener("change", () => { enterBtn.disabled = !ageCheck.checked; });
   enterBtn.addEventListener("click", () => {
     if (!ageCheck.checked) return;
@@ -304,7 +333,7 @@
     }
   });
   $("#clearData").addEventListener("click", () => {
-    ["aline-18", "aline-nombre", "aline-api", "aline-image-key", "aline-provider", "aline-endpoint", "aline-model", "aline-server-url", "aline-use-server", "aline-conversation-id", "aline-memoria", "aline-modo"].forEach(k => localStorage.removeItem(k));
+    ["aline-18", "aline-unlocked", "aline-nombre", "aline-api", "aline-image-key", "aline-provider", "aline-endpoint", "aline-model", "aline-server-url", "aline-use-server", "aline-conversation-id", "aline-memoria", "aline-modo"].forEach(k => localStorage.removeItem(k));
     location.reload();
   });
 })();
