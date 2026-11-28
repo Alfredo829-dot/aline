@@ -20,7 +20,7 @@
     <p>Contenido para mayores de 18 años. Personaje ficticio, generado por IA. Nada de lo que dice es consejo real, y todo queda en tu teléfono.</p>
     <label class="check"><input type="checkbox" id="ageCheck"> Confirmo que tengo 18 años o más</label>
     <button id="enterBtn" disabled>Entrar con Aline</button>
-    <p class="tiny">Al entrar aceptas que eres adulto. No se sube nada a ningún servidor.</p>
+    <p class="tiny">Al entrar aceptas que eres adulto. Sin servidor, no se sube nada a ningún servidor. Si activas tu servidor en Ajustes, los chats se guardan cifrados en tu Postgres.</p>
   </div>
 </div>
 
@@ -60,6 +60,12 @@
       <button id="sendBtn">➤</button>
     </div>
     <p class="tiny">Con API configurada responde el modelo real. Sin API, usa respuestas guardadas offline. Las palabras como “beso”, “playa”, “parque” o “tímida” cambian su animación.</p>
+    <div class="image-gen">
+      <input id="imagePrompt" type="text" placeholder="Describe una imagen de Aline… (solo con servidor)" autocomplete="off" maxlength="200">
+      <button id="imageBtn" type="button">🎨 Generar imagen</button>
+    </div>
+    <p id="imageMsg" class="tiny"></p>
+    <img id="generatedImage" class="generated-img hidden" alt="Imagen generada de Aline">
   </section>
 
   <details class="settings">
@@ -68,6 +74,7 @@
     <label>Proveedor del modelo
       <select id="provider">
         <option value="groq">Groq (rápido, gratis con key)</option>
+        <option value="together">Together AI (Llama/Mistral open-source)</option>
         <option value="openai">OpenAI</option>
         <option value="openrouter">OpenRouter</option>
         <option value="deepseek">DeepSeek</option>
@@ -77,12 +84,17 @@
     <label>Endpoint (URL de chat completions)<input id="endpoint" type="text" placeholder="https://api.groq.com/openai/v1/chat/completions"></label>
     <label>Modelo<input id="model" type="text" placeholder="llama-3.3-70b-versatile"></label>
     <label>Tu API key (BYOK — solo se guarda en tu navegador, nunca en el repo)<input id="apiKey" type="password" placeholder="gsk-… / sk-…"></label>
+    <label>Mi servidor (opcional — Llama/Mistral + Stable Diffusion + historial cifrado en Postgres)
+      <input id="serverUrl" type="text" placeholder="http://localhost:3001 o https://tu-servidor.com">
+    </label>
+    <label class="check"><input type="checkbox" id="useServer"> Usar mi servidor en vez de la API directa</label>
+    <p class="tiny">Con servidor, la key va solo en el .env del servidor (carpeta server/), y los chats se guardan cifrados en PostgreSQL. Sin servidor, todo sigue como antes. Ver server/README.md.</p>
     <button id="saveSettings">Guardar</button>
     <button id="testApi" type="button">Probar conexión</button>
     <p id="apiMsg" class="tiny"></p>
     <p class="tiny">Pega tu key aquí mismo en el sitio, no en el chat ni en GitHub. Sin key, Aline sigue respondiendo offline.</p>
     <button id="clearData" class="danger">Borrar mis datos de este teléfono</button>
-    <p class="tiny">Sin cuentas, sin servidor, sin claves en el código. Los 7 vídeos están en la carpeta <code>clips/</code>.</p>
+    <p class="tiny">Sin cuentas, sin servidor, sin claves en el código. Los 7 vídeos están en la carpeta <code>clips/</code>. Servidor opcional en <code>server/</code>: Llama/Mistral + Stable Diffusion + Postgres cifrado.</p>
   </details>
 
   <footer class="tiny">Aline es un personaje ficticio adulto generado por IA. +18. Hecho para uso personal.</footer>

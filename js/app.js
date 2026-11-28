@@ -100,7 +100,11 @@
   function refreshStatus() {
     if (typeof ALINE_AI !== "undefined" && ALINE_AI.hasKey()) {
       const c = ALINE_AI.getConfig();
-      setStatus("IA: " + (ALINE_AI.presets[c.provider] || {}).label + " · " + c.model, true);
+      if (c.useServer && c.serverUrl) {
+        setStatus("IA: Mi servidor · Llama/Mistral + SD", true);
+      } else {
+        setStatus("IA: " + (ALINE_AI.presets[c.provider] || {}).label + " · " + c.model, true);
+      }
     } else {
       setStatus("Offline · respuestas guardadas", false);
     }
@@ -172,12 +176,38 @@
     });
   });
 
+  // --- Generar imagen (solo con servidor: Stable Diffusion / FLUX) ---
+  const imagePrompt = $("#imagePrompt");
+  const imageBtn = $("#imageBtn");
+  const imageMsg = $("#imageMsg");
+  const generatedImage = $("#generatedImage");
+  if (imageBtn) {
+    imageBtn.addEventListener("click", async () => {
+      const prompt = imagePrompt.value.trim();
+      if (!prompt) { imageMsg.textContent = "Describe la imagen primero."; return; }
+      imageMsg.textContent = "Generando imagen… puede tardar 20-60 s.";
+      imageBtn.disabled = true;
+      try {
+        const img = await ALINE_AI.imageViaServer("Aline, adult fictional woman, brown hair in two ponytails, black Hello Kitty top: " + prompt);
+        generatedImage.src = img.url;
+        generatedImage.classList.remove("hidden");
+        imageMsg.textContent = "Lista. Solo para adultos, personaje ficticio.";
+      } catch (e) {
+        imageMsg.textContent = "✗ " + e.message;
+      } finally {
+        imageBtn.disabled = false;
+      }
+    });
+  }
+
   // --- Ajustes: nombre y modelo real BYOK (solo en este navegador) ---
   const nameInput = $("#userName");
   const apiInput = $("#apiKey");
   const providerSelect = $("#provider");
   const endpointInput = $("#endpoint");
   const modelInput = $("#model");
+  const serverUrlInput = $("#serverUrl");
+  const useServerInput = $("#useServer");
   const saveSettings = $("#saveSettings");
   const testBtn = $("#testApi");
   const apiMsg = $("#apiMsg");
@@ -193,6 +223,8 @@
     providerSelect.value = cfg.provider;
     endpointInput.value = cfg.endpoint;
     modelInput.value = cfg.model;
+    if (serverUrlInput) serverUrlInput.value = cfg.serverUrl || "";
+    if (useServerInput) useServerInput.checked = !!cfg.useServer;
   }
   providerSelect.addEventListener("change", fillPreset);
   nameInput.value = localStorage.getItem("aline-nombre") || "";
@@ -202,6 +234,8 @@
     localStorage.setItem("aline-provider", providerSelect.value);
     localStorage.setItem("aline-endpoint", endpointInput.value.trim());
     localStorage.setItem("aline-model", modelInput.value.trim());
+    if (serverUrlInput) localStorage.setItem("aline-server-url", serverUrlInput.value.trim());
+    if (useServerInput) localStorage.setItem("aline-use-server", useServerInput.checked ? "si" : "no");
     const v = apiInput.value.trim();
     if (v && v !== "••••••••") localStorage.setItem("aline-api", v);
     refreshStatus();
@@ -222,7 +256,7 @@
     }
   });
   $("#clearData").addEventListener("click", () => {
-    ["aline-18", "aline-nombre", "aline-api", "aline-provider", "aline-endpoint", "aline-model"].forEach(k => localStorage.removeItem(k));
+    ["aline-18", "aline-nombre", "aline-api", "aline-provider", "aline-endpoint", "aline-model", "aline-server-url", "aline-use-server", "aline-conversation-id"].forEach(k => localStorage.removeItem(k));
     location.reload();
   });
 })();

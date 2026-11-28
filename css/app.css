@@ -38,6 +38,10 @@ button { font: inherit; cursor: pointer; }
 .msg.aline { background: #241a20; border: 1px solid #3a2430; align-self: flex-start; border-bottom-left-radius: 4px; }
 .msg.tu { background: var(--pink); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
 .chat-input { display: flex; gap: 8px; margin-top: 10px; }
+.image-gen { display: flex; gap: 8px; margin-top: 10px; }
+.image-gen input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--text); outline: none; }
+.image-gen button { padding: 10px 12px; border-radius: 12px; border: 0; background: #2a2130; color: var(--text); font-weight: 700; }
+.generated-img { width: 100%; border-radius: 14px; margin-top: 10px; display: block; }
 .chat-input input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--text); outline: none; }
 .chat-input input:focus { border-color: var(--pink); }
 #sendBtn { width: 48px; border-radius: 12px; border: 0; background: var(--pink); color: #fff; font-size: 18px; }

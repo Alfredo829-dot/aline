@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: aline
+      POSTGRES_PASSWORD: aline
+      POSTGRES_DB: aline
+    ports:
+      - "5432:5432"
+    volumes:
+      - aline-pg:/var/lib/postgresql/data
+  server:
+    build: .
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgres://aline:aline@db:5432/aline
+      # Pon tus keys reales en un .env junto a este archivo, o aquí:
+      CHAT_ENCRYPTION_KEY: ${CHAT_ENCRYPTION_KEY:-}
+      CHAT_PROVIDER: ${CHAT_PROVIDER:-together}
+      TOGETHER_API_KEY: ${TOGETHER_API_KEY:-}
+      IMAGE_PROVIDER: ${IMAGE_PROVIDER:-together}
+      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN:-}
+      OLLAMA_URL: ${OLLAMA_URL:-}
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+volumes:
+  aline-pg:

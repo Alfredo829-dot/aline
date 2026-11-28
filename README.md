@@ -6,7 +6,8 @@ Simulador de compañera IA adulta, para celular. Chat + animaciones en vídeo. S
 
 - **Personaje:** Aline, adulta ficticia. Pelo castaño en dos coletas, ojos rojos, top negro de Hello Kitty.
 - **Chat con modelo real (BYOK):** conecta tu propia API OpenAI-compatible en Ajustes del sitio: proveedor, endpoint, modelo y key. La key se guarda solo en tu navegador (localStorage). Nunca va al repo ni al chat. Sin key, responde offline con respuestas locales en `js/personaje.js`.
-- **Proveedores listos:** Groq (por defecto, `llama-3.3-70b-versatile`), OpenAI (`gpt-4o-mini`), OpenRouter y DeepSeek, o uno personalizado con su endpoint de `chat/completions`.
+- **Proveedores listos:** Groq (por defecto, `llama-3.3-70b-versatile`), Together AI (`meta-llama/Llama-3.3-70B-Instruct-Turbo`), OpenAI (`gpt-4o-mini`), OpenRouter y DeepSeek, o uno personalizado con su endpoint de `chat/completions`.
+- **Servidor propio (opcional, carpeta `server/`):** Node + Express que conecta con modelos open-source (Llama/Mistral vía Together AI, Replicate o tu propio servidor con GPUs con Ollama/vLLM) y motores de imagen (Stable Diffusion vía Together, Replicate o tu Automatic1111 local), y guarda los chats en PostgreSQL cifrados con AES-256-GCM. En Ajustes pon la URL de tu servidor y marca “Usar mi servidor”: ahí el chat y el botón 🎨 Generar imagen van por tu servidor, y la key ya no va en el navegador. Ver `server/README.md`.
 - **Puerta +18:** pide confirmar 18+ antes de entrar. Se guarda solo en el teléfono.
 
 ## Animaciones — los 7 vídeos
